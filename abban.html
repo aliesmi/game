@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی مدیریت آب مشهد - آبینو</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @font-face {
+            font-family: 'IRANSans';
+            src: url('https://cdn.fontcdn.ir/Font/Persian/IRANSans/IRANSansWeb(FaNum).woff') format('woff');
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'IRANSans', sans-serif;
+            user-select: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f9ff;
+            color: #333;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+        
+        /* صفحه شروع */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0066cc, #00b4d8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: all 0.5s ease;
+        }
+        
+        .start-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .start-logo {
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            animation: logoFloat 4s infinite ease-in-out;
+        }
+        
+        @keyframes logoFloat {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        .start-logo i {
+            font-size: 5rem;
+            color: white;
+        }
+        
+        .start-screen h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: titleFloat 3s infinite ease-in-out;
+        }
+        
+        @keyframes titleFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .start-screen p {
+            color: white;
+            font-size: 1.2rem;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .start-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .player-count-option {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .player-count-option:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .player-count-option.selected {
+            background-color: white;
+            color: #0066cc;
+            border-color: #00b4d8;
+        }
+        
+        .start-button {
+            background-color: white;
+            color: #0066cc;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+            background-color: #f0f9ff;
+        }
+        
+        /* صفحه اصلی بازی */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .container.visible {
+            opacity: 1;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0066cc, #00b4d8);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(255,255,255,0.3)" d="M0,70L48,67C96,64,192,58,288,55C384,52,480,52,576,60C672,68,768,84,864,85C960,86,1056,72,1152,65C1248,58,1344,58,1392,58L1440,58L1440,100L1392,100C1344,100,1248,100,1152,100C1056,100,960,100,864,100C768,100,672,100,576,100C480,100,384,100,288,100C192,100,96,100,48,100L0,100Z"></path></svg>');
+            background-size: cover;
+            animation: wave 10s linear infinite;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            align-items: center;
+        }
+        
+        .turn-indicator {
+            background-color: #ffbe0b;
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .game-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-box {
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-box i {
+            color: #0066cc;
+        }
+        
+        .game-board-container {
+            position: relative;
+            width: 100%;
+            margin: 30px 0;
+        }
+        
+        .game-board {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background-image: url('https://map.viamichelin.com/map/carte?map=viamichelin&z=10&lat=36.26046&lon=59.61675&width=550&height=382&format=png&version=latest&layer=background&debug_pattern=.*');
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,102,204,0.1), rgba(0,180,216,0.2));
+            z-index: 1;
+        }
+        
+        .region {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            overflow: hidden;
+        }
+        
+        .region::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .region:hover::before {
+            opacity: 1;
+        }
+        
+        .region:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        .region.active {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.8);
+            z-index: 11;
+        }
+        
+        .region-name {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 5px;
+        }
+        
+        .region-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .region-crisis {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(217, 4, 41, 0.7);
+            transition: width 0.5s ease;
+        }
+        
+        .region-1 {
+            top: 15%;
+            left: 20%;
+            background: linear-gradient(135deg, #e63946, #ff758f);
+        }
+        
+        .region-2 {
+            top: 30%;
+            right: 25%;
+            background: linear-gradient(135deg, #457b9d, #6d9dc5);
+        }
+        
+        .region-3 {
+            bottom: 20%;
+            left: 30%;
+            background: linear-gradient(135deg, #1d3557, #3a5683);
+        }
+        
+        .region-4 {
+            top: 40%;
+            left: 10%;
+            background: linear-gradient(135deg, #a8dadc, #caf0f8);
+            color: #333;
+        }
+        
+        .region-5 {
+            bottom: 25%;
+            right: 15%;
+            background: linear-gradient(135deg, #f1faee, #ffffff);
+            color: #333;
+        }
+        
+        .region-6 {
+            top: 20%;
+            right: 10%;
+            background: linear-gradient(135deg, #f4a261, #ff9a76);
+        }
+        
+        .crisis-point {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #d90429;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.7rem;
+            cursor: pointer;
+            z-index: 3;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .crisis-point:hover {
+            transform: scale(1.2);
+        }
+        
+        .crisis-point::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: inherit;
+            animation: crisisPulse 2s infinite;
+            z-index: -1;
+        }
+        
+        @keyframes crisisPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .player-token {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        
+        .player-token.active {
+            animation: tokenGlow 1.5s infinite alternate, float 3s infinite ease-in-out;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes tokenGlow {
+            0% { box-shadow: 0 0 5px 0px rgba(255, 255, 255, 0.8); }
+            100% { box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.8); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .token-1 { background-color: #ffbe0b; }
+        .token-2 { background-color: #fb5607; }
+        .token-3 { background-color: #8338ec; }
+        .token-4 { background-color: #3a86ff; }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 250px;
+            animation: slideUp 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .panel h3 {
+            margin-top: 0;
+            color: #0066cc;
+            border-bottom: 2px solid #e6f7ff;
+            padding-bottom: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel h3::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: #00b4d8;
+        }
+        
+        .panel h3 i {
+            font-size: 1.2rem;
+        }
+        
+        .resource-token {
+            display: inline-flex;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #06d6a0, #04a777);
+            margin: 5px;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .resource-token:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #0066cc, #0088ff);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px 0;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        button i {
+            margin-left: 8px;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .modal h2 {
+            margin-top: 0;
+            color: #0066cc;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e6f7ff;
+        }
+        
+        /* صفحه پایان بازی */
+        .end-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0066cc, #00b4d8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .end-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .end-logo {
+            width: 120px;
+            height: 120px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .end-logo i {
+            font-size: 4rem;
+            color: white;
+        }
+        
+        .end-screen h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .winner {
+            font-size: 2rem;
+            color: #ffbe0b;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 1.5s infinite;
+            background-color: rgba(0,0,0,0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+        
+        .end-stats {
+            background-color: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .end-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .end-stat:last-child {
+            margin-bottom: 0;
+        }
+        
+        .restart-button {
+            background-color: white;
+            color: #0066cc;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .restart-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+            background-color: #f0f9ff;
+        }
+        
+        /* آموزش بازی */
+        .tutorial {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #0066cc;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 50;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .tutorial:hover {
+            transform: scale(1.1);
+            background-color: #0088ff;
+        }
+        
+        /* رسپانسیو */
+        @media (max-width: 768px) {
+            .game-board {
+                height: 400px;
+            }
+            
+            .region {
+                width: 80px;
+                height: 80px;
+                font-size: 0.7rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .panel {
+                min-width: 100%;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .start-screen h1 {
+                font-size: 2rem;
+            }
+            
+            .start-options {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .stat-box {
+                justify-content: center;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            opacity: 0;
+            max-width: 80%;
+            text-align: center;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .toast-success {
+            background-color: #43aa8b;
+        }
+        
+        .toast-error {
+            background-color: #e63946;
+        }
+
+        .region-section {
+            margin-bottom: 20px;
+        }
+        
+        .region-section h3 {
+            color: #0066cc;
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .region-section ul {
+            padding-right: 20px;
+            margin: 0;
+        }
+        
+        .region-section li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .region-section li i {
+            color: #00b4d8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+        }
+
+        .solution-options {
+            margin-top: 15px;
+        }
+        
+        .solution-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-right: 4px solid transparent;
+            position: relative;
+        }
+        
+        .solution-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+        }
+        
+        .solution-card.selected {
+            border-right-color: #00b4d8;
+            background-color: #f0f9ff;
+        }
+        
+        .solution-card h4 {
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0066cc;
+        }
+        
+        .solution-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .solution-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .solution-cost {
+            color: #e63946;
+            font-weight: bold;
+        }
+        
+        .solution-impact {
+            color: #06d6a0;
+            font-weight: bold;
+        }
+        
+        .solution-success-rate {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0,102,204,0.1);
+            color: #0066cc;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- صفحه شروع بازی -->
+    <div class="start-screen">
+        <div class="start-logo">
+            <i class="fas fa-tint"></i>
+        </div>
+        <h1>بازی مدیریت آب مشهد</h1>
+        <p>در این بازی شما مسئول مدیریت منابع آب یکی از مناطق مشهد هستید. با حل بحران هر منطقه به منطقه بعدی می‌روید. بازیکنی که بیشترین مناطق را با امتیاز بالاتر حل کند برنده می‌شود!</p>
+        
+        <div class="start-options">
+            <div class="player-count-option selected" data-players="2">
+                <i class="fas fa-user-friends"></i> 2 بازیکن
+            </div>
+            <div class="player-count-option" data-players="3">
+                <i class="fas fa-users"></i> 3 بازیکن
+            </div>
+            <div class="player-count-option" data-players="4">
+                <i class="fas fa-users"></i> 4 بازیکن
+            </div>
+        </div>
+        
+        <button class="start-button">
+            شروع بازی
+            <i class="fas fa-play"></i>
+        </button>
+    </div>
+    
+    <!-- صفحه اصلی بازی -->
+    <div class="container">
+        <header>
+            <div class="header-water"></div>
+            <h1>مدیریت آب مشهد - آبینو</h1>
+            <p>منابع آب شهر خود را مدیریت کنید و بحران هر منطقه را حل نمایید</p>
+        </header>
+        
+        <div class="game-info">
+            <div class="player-info">
+                <span id="current-player">بازیکن 1</span>
+                <span class="turn-indicator">
+                    <i class="fas fa-hourglass-half"></i>
+                    نوبت شما
+                </span>
+            </div>
+            <div class="game-stats">
+                <div class="stat-box">
+                    <i class="fas fa-redo"></i>
+                    دور: <span id="current-round">1</span>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-clock"></i>
+                    زمان: <span id="game-time">00:00</span>
+                </div>
+                <div class="stat-box" id="turn-timer">
+                    <i class="fas fa-hourglass-end"></i>
+                    زمان نوبت: 01:00
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-board-container">
+            <div class="game-board">
+                <div class="map-overlay"></div>
+                
+                <!-- مناطق مشهد -->
+                <div class="region region-1">
+                    <div class="region-icon"><i class="fas fa-city"></i></div>
+                    <div class="region-name">منطقه 1<br>مرکزی</div>
+                    <div class="region-crisis" style="width: 75%;"></div>
+                </div>
+                <div class="region region-2">
+                    <div class="region-icon"><i class="fas fa-tree"></i></div>
+                    <div class="region-name">منطقه 2<br>شمالی</div>
+                    <div class="region-crisis" style="width: 60%;"></div>
+                </div>
+                <div class="region region-3">
+                    <div class="region-icon"><i class="fas fa-home"></i></div>
+                    <div class="region-name">منطقه 3<br>شرقی</div>
+                    <div class="region-crisis" style="width: 45%;"></div>
+                </div>
+                <div class="region region-4">
+                    <div class="region-icon"><i class="fas fa-tractor"></i></div>
+                    <div class="region-name">منطقه 4<br>جنوبی</div>
+                    <div class="region-crisis" style="width: 30%;"></div>
+                </div>
+                <div class="region region-5">
+                    <div class="region-icon"><i class="fas fa-industry"></i></div>
+                    <div class="region-name">منطقه 5<br>غربی</div>
+                    <div class="region-crisis" style="width: 55%;"></div>
+                </div>
+                <div class="region region-6">
+                    <div class="region-icon"><i class="fas fa-factory"></i></div>
+                    <div class="region-name">منطقه 6<br>صنعتی</div>
+                    <div class="region-crisis" style="width: 80%;"></div>
+                </div>
+                
+                <!-- توکن بازیکنان -->
+                <div class="player-token token-1 active" style="top: 15%; left: 20%;">1</div>
+                <div class="player-token token-2" style="top: 30%; right: 25%;">2</div>
+                <div class="player-token token-3" style="bottom: 20%; left: 30%;">3</div>
+                <div class="player-token token-4" style="top: 40%; left: 10%;">4</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="panel">
+                <h3><i class="fas fa-coins"></i> منابع شما</h3>
+                <div id="player-resources">
+                    <span class="resource-token">5</span>
+                    <span class="resource-token">5</span>
+                    <span class="resource-token">5</span>
+                    <span class="resource-token">5</span>
+                </div>
+                <p>مجموع: <span id="total-resources">20</span> امتیاز</p>
+                <p>منطقه فعلی: <span id="current-region">مرکزی</span></p>
+            </div>
+            
+            <div class="panel">
+                <h3><i class="fas fa-info-circle"></i> وضعیت منطقه</h3>
+                <div id="regions-status">
+                    <p>منطقه فعلی: <span id="current-region-status">مرکزی - 75% بحران</span></p>
+                </div>
+                <div class="action-buttons">
+                    <button id="region-details">
+                        بررسی جزئیات
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button id="end-turn">
+                        اتمام نوبت
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- مودال جزئیات منطقه -->
+    <div class="modal" id="region-modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 id="modal-region-name">منطقه مرکزی</h2>
+            <div id="modal-region-details">
+                <div class="region-section">
+                    <h3><i class="fas fa-exclamation-circle"></i> عوامل بحران:</h3>
+                    <ul id="modal-crisis-factors">
+                        <li><i class="fas fa-check-circle"></i> مصرف بالای آب خانگی</li>
+                        <li><i class="fas fa-check-circle"></i> فرسودگی شبکه توزیع</li>
+                        <li><i class="fas fa-check-circle"></i> کمبود منابع زیرزمینی</li>
+                    </ul>
+                </div>
+                <div class="region-section">
+                    <h3><i class="fas fa-lightbulb"></i> راهکارهای پیشنهادی:</h3>
+                    <div class="solution-options" id="solution-options">
+                        <!-- راهکارها به صورت دینامیک اضافه می‌شوند -->
+                    </div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="apply-solution" disabled>
+                    اعمال راهکار
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- صفحه پایان بازی -->
+    <div class="end-screen">
+        <div class="end-logo">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <h1>پایان بازی!</h1>
+        <div class="winner" id="winner-name">بازیکن 2 برنده شد!</div>
+        <p id="end-message">شما با حل بحران بیشترین مناطق و کسب بالاترین امتیاز برنده شدید!</p>
+        
+        <div class="end-stats">
+            <div class="end-stat">
+                <span>مدت زمان بازی:</span>
+                <span id="end-time">12:45</span>
+            </div>
+            <div class="end-stat">
+                <span>تعداد دورها:</span>
+                <span id="end-rounds">5</span>
+            </div>
+            <div class="end-stat">
+                <span>مناطق حل شده:</span>
+                <span id="end-regions">3/6</span>
+            </div>
+            <div class="end-stat">
+                <span>امتیاز نهایی:</span>
+                <span id="end-score">85</span>
+            </div>
+        </div>
+        
+        <button class="restart-button">
+            بازی دوباره
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
+    
+    <!-- آموزش بازی -->
+    <div class="tutorial" id="tutorial-button">
+        <i class="fas fa-question"></i>
+    </div>
+    
+    <!-- مودال آموزش -->
+    <div class="modal" id="tutorial-modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2><i class="fas fa-graduation-cap"></i> آموزش بازی</h2>
+            <div class="tutorial-content">
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-map-marked-alt"></i> معرفی مناطق</h3>
+                    <p>شهر مشهد به 6 منطقه تقسیم شده است. هر بازیکن باید بحران هر منطقه را به ترتیب حل کند.</p>
+                </div>
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-tasks"></i> هدف بازی</h3>
+                    <p>هدف شما حل بحران هر منطقه و رفتن به منطقه بعدی است. بازیکنی که بیشترین مناطق را با امتیاز بالاتر حل کند برنده می‌شود.</p>
+                </div>
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-coins"></i> منابع و امتیاز</h3>
+                    <p>هر بازیکن در ابتدا 20 امتیاز دارد. از این امتیازها برای اجرای راهکارها و کاهش بحران استفاده می‌کنید.</p>
+                </div>
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-stopwatch"></i> محدودیت‌ها</h3>
+                    <p>هر بازیکن در هر نوبت فقط می‌تواند 3 اقدام انجام دهد. همچنین زمان هر نوبت 45 ثانیه است.</p>
+                </div>
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-lightbulb"></i> سیستم راهکارها</h3>
+                    <p>برای هر منطقه چندین راهکار وجود دارد که هر کدام هزینه، تأثیر و نرخ موفقیت متفاوتی دارند. راهکارهای بهتر هزینه بیشتری دارند اما شانس موفقیت بالاتری دارند.</p>
+                </div>
+            </div>
+            <button id="close-tutorial">
+                فهمیدم، شروع بازی!
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- صداها -->
+    <audio id="click-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+    <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+    <audio id="crisis-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-alarm-905.mp3"></audio>
+    <audio id="success-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
+    <audio id="failure-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3"></audio>
+    
+    <script>
+        // متغیرهای بازی
+        const gameConfig = {
+            initialResources: 20,
+            maxResources: 50,
+            maxCrisisLevel: 100,
+            roundTime: 60, // زمان هر نوبت به ثانیه (افزایش یافته)
+            maxRounds: 15, // حداکثر تعداد دورهای بازی (افزایش یافته)
+            regionsOrder: [1, 2, 3, 4, 5, 6] // ترتیب مناطق برای حل بحران
+        };
+        
+        let players = [];
+        let regions = [];
+        let currentPlayerIndex = 0;
+        let round = 1;
+        let gameTime = 0;
+        let gameInterval;
+        let turnInterval;
+        let turnTimeLeft = gameConfig.roundTime;
+        let selectedRegion = null;
+        let playerCount = 2;
+        let selectedSolution = null;
+        
+        // المان‌های DOM
+        const startScreen = document.querySelector('.start-screen');
+        const gameContainer = document.querySelector('.container');
+        const endScreen = document.querySelector('.end-screen');
+        const startButton = document.querySelector('.start-button');
+        const restartButton = document.querySelector('.restart-button');
+        const playerCountOptions = document.querySelectorAll('.player-count-option');
+        const currentPlayerElement = document.getElementById('current-player');
+        const currentRoundElement = document.getElementById('current-round');
+        const gameTimeElement = document.getElementById('game-time');
+        const playerResourcesElement = document.getElementById('player-resources');
+        const totalResourcesElement = document.getElementById('total-resources');
+        const currentRegionElement = document.getElementById('current-region');
+        const regionModal = document.getElementById('region-modal');
+        const modalClose = document.querySelector('.modal-close');
+        const modalRegionName = document.getElementById('modal-region-name');
+        const modalCrisisFactors = document.getElementById('modal-crisis-factors');
+        const solutionOptions = document.getElementById('solution-options');
+        const applySolutionButton = document.getElementById('apply-solution');
+        const endTurnButton = document.getElementById('end-turn');
+        const winnerNameElement = document.getElementById('winner-name');
+        const endMessageElement = document.getElementById('end-message');
+        const endTimeElement = document.getElementById('end-time');
+        const endRoundsElement = document.getElementById('end-rounds');
+        const endRegionsElement = document.getElementById('end-regions');
+        const endScoreElement = document.getElementById('end-score');
+        const tutorialButton = document.getElementById('tutorial-button');
+        const tutorialModal = document.getElementById('tutorial-modal');
+        const closeTutorialButton = document.getElementById('close-tutorial');
+        const regionDetailsButton = document.getElementById('region-details');
+        const currentRegionStatusElement = document.getElementById('current-region-status');
+
+        // صداها
+        const clickSound = document.getElementById('click-sound');
+        const winSound = document.getElementById('win-sound');
+        const crisisSound = document.getElementById('crisis-sound');
+        const successSound = document.getElementById('success-sound');
+        const failureSound = document.getElementById('failure-sound');
+        
+        // راهکارهای بحران
+        const solutionTypes = [
+            {
+                name: "کمپین آگاه‌سازی",
+                description: "برگزاری کارگاه‌های آموزشی برای شهروندان درباره صرفه‌جویی در مصرف آب",
+                cost: 5,
+                baseImpact: 10,
+                successRate: 70,
+                icon: "fa-chalkboard-teacher",
+                successMessage: "کمپین آگاه‌سازی با موفقیت اجرا شد! سطح آگاهی شهروندان افزایش یافت.",
+                failureMessage: "کمپین آگاه‌سازی تأثیر چندانی نداشت. شهروندان مشارکت کمی داشتند."
+            },
+            {
+                name: "تعمیرات شبکه",
+                description: "تعمیر و بهینه‌سازی شبکه توزیع آب برای کاهش هدررفت",
+                cost: 8,
+                baseImpact: 15,
+                successRate: 80,
+                icon: "fa-tools",
+                successMessage: "شبکه توزیع آب با موفقیت بهینه‌سازی شد! هدررفت آب کاهش یافت.",
+                failureMessage: "تعمیرات شبکه با مشکلات فنی مواجه شد و تأثیر چندانی نداشت."
+            },
+            {
+                name: "سیستم نظارت هوشمند",
+                description: "نصب سنسورهای هوشمند برای شناسایی سریع نشت‌ها و مشکلات",
+                cost: 12,
+                baseImpact: 20,
+                successRate: 85,
+                icon: "fa-microchip",
+                successMessage: "سیستم نظارت هوشمند با موفقیت نصب شد! مشکلات سریع‌تر شناسایی می‌شوند.",
+                failureMessage: "پیاده‌سازی سیستم هوشمند با تأخیر مواجه شد و هنوز عملیاتی نشده است."
+            },
+            {
+                name: "تصفیه آب پیشرفته",
+                description: "استفاده از فناوری‌های نوین برای تصفیه و بازیافت آب",
+                cost: 15,
+                baseImpact: 25,
+                successRate: 75,
+                icon: "fa-filter",
+                successMessage: "سیستم تصفیه پیشرفته با موفقیت نصب شد! کیفیت آب بهبود یافت.",
+                failureMessage: "پیاده‌سازی سیستم تصفیه با مشکلات فنی مواجه شد."
+            },
+            {
+                name: "مدیریت هوشمند مصرف",
+                description: "استفاده از کنتورهای هوشمند برای مدیریت دقیق مصرف آب",
+                cost: 18,
+                baseImpact: 30,
+                successRate: 90,
+                icon: "fa-tachometer-alt",
+                successMessage: "سیستم مدیریت هوشمند با موفقیت اجرا شد! مصرف آب بهینه شد.",
+                failureMessage: "استقبال از سیستم مدیریت هوشمند کم بود."
+            }
+        ];
+
+        // رویدادهای بازی
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+        modalClose.addEventListener('click', () => closeModal(regionModal));
+        
+        playerCountOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                playerCountOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                playerCount = parseInt(option.dataset.players);
+                playSound(clickSound);
+            });
+        });
+        
+        // رویدادهای بازی
+        document.querySelectorAll('.region').forEach(region => {
+            region.addEventListener('click', selectRegion);
+        });
+        
+        applySolutionButton.addEventListener('click', applySolution);
+        endTurnButton.addEventListener('click', endTurn);
+        regionDetailsButton.addEventListener('click', showRegionDetailsForCurrentPlayer);
+        tutorialButton.addEventListener('click', showTutorial);
+        closeTutorialButton.addEventListener('click', () => closeModal(tutorialModal));
+        
+        // توابع بازی
+        function initializeGame() {
+            // Initialize players
+            players = [];
+            const playerNames = ["بازیکن 1", "بازیکن 2", "بازیکن 3", "بازیکن 4"];
+            
+            for (let i = 0; i < playerCount; i++) {
+                players.push({
+                    id: i + 1,
+                    name: playerNames[i],
+                    resources: gameConfig.initialResources,
+                    position: 0, // موقعیت فعلی در لیست مناطق (شماره منطقه فعلی)
+                    active: true,
+                    completedRegions: [], // مناطق تکمیل شده
+                    currentRegion: 1, // منطقه فعلی که باید حل شود
+                    solutionsApplied: 0,
+                    successfulSolutions: 0,
+                    failedSolutions: 0,
+                    score: 0 // امتیاز کلی
+                });
+            }
+            
+            // Initialize regions
+            regions = [
+                { 
+                    id: 1, 
+                    name: "مرکزی", 
+                    crisisLevel: 75, 
+                    crisisFactors: ["مصرف بالای آب خانگی", "فرسودگی شبکه توزیع", "کمبود منابع زیرزمینی"], 
+                    icon: "fa-city",
+                    completed: false
+                },
+                { 
+                    id: 2, 
+                    name: "شمالی", 
+                    crisisLevel: 60, 
+                    crisisFactors: ["کشاورزی ناکارآمد", "حفر چاه‌های غیرمجاز", "تبخیر سطحی"], 
+                    icon: "fa-tree",
+                    completed: false
+                },
+                { 
+                    id: 3, 
+                    name: "شرقی", 
+                    crisisLevel: 45, 
+                    crisisFactors: ["رشد جمعیت", "صنایع آب‌بر", "هدررفت آب"], 
+                    icon: "fa-home",
+                    completed: false
+                },
+                { 
+                    id: 4, 
+                    name: "جنوبی", 
+                    crisisLevel: 30, 
+                    crisisFactors: ["کمبود بارش", "شوری آب", "عدم مدیریت صحیح"], 
+                    icon: "fa-tractor",
+                    completed: false
+                },
+                { 
+                    id: 5, 
+                    name: "غربی", 
+                    crisisLevel: 55, 
+                    crisisFactors: ["نشت لوله‌ها", "مصرف غیرمجاز", "تغییر اقلیم"], 
+                    icon: "fa-industry",
+                    completed: false
+                },
+                { 
+                    id: 6, 
+                    name: "صنعتی", 
+                    crisisLevel: 80, 
+                    crisisFactors: ["آلودگی صنعتی", "مصرف بالا", "پسماندهای سمی"], 
+                    icon: "fa-factory",
+                    completed: false
+                }
+            ];
+            
+            currentPlayerIndex = 0;
+            round = 1;
+            gameTime = 0;
+            turnTimeLeft = gameConfig.roundTime;
+            selectedSolution = null;
+            
+            updatePlayerTurn();
+            updateRegionsStatus();
+        }
+        
+        function startGame() {
+            initializeGame();
+            startScreen.classList.add('hidden');
+            gameContainer.classList.add('visible');
+            
+            // شروع تایمر بازی
+            gameInterval = setInterval(updateGameTime, 1000);
+            startTurnTimer();
+            
+            playSound(clickSound);
+        }
+        
+        function updateGameTime() {
+            gameTime++;
+            const minutes = Math.floor(gameTime / 60).toString().padStart(2, '0');
+            const seconds = (gameTime % 60).toString().padStart(2, '0');
+            gameTimeElement.textContent = `${minutes}:${seconds}`;
+        }
+        
+        function startTurnTimer() {
+            clearInterval(turnInterval);
+            turnTimeLeft = gameConfig.roundTime;
+            updateTurnTimerDisplay();
+            
+            turnInterval = setInterval(() => {
+                turnTimeLeft--;
+                updateTurnTimerDisplay();
+                
+                if (turnTimeLeft <= 0) {
+                    clearInterval(turnInterval);
+                    endTurn();
+                }
+            }, 1000);
+        }
+        
+        function updateTurnTimerDisplay() {
+            const minutes = Math.floor(turnTimeLeft / 60).toString().padStart(2, '0');
+            const seconds = (turnTimeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('turn-timer').textContent = `زمان نوبت: ${minutes}:${seconds}`;
+        }
+        
+        function restartGame() {
+            clearInterval(gameInterval);
+            clearInterval(turnInterval);
+            
+            endScreen.classList.remove('active');
+            startScreen.classList.remove('hidden');
+            gameContainer.classList.remove('visible');
+            
+            playSound(clickSound);
+        }
+        
+        function selectRegion(e) {
+            const regionElement = e.currentTarget;
+            const regionId = parseInt(regionElement.classList[1].split('-')[1]);
+            
+            // حذف انتخاب قبلی
+            document.querySelectorAll('.region').forEach(r => r.classList.remove('active'));
+            
+            // انتخاب منطقه جدید
+            regionElement.classList.add('active');
+            selectedRegion = regions.find(r => r.id === regionId);
+            
+            // نمایش جزئیات منطقه در مودال
+            showRegionDetails(selectedRegion);
+            playSound(clickSound);
+        }
+        
+        function showRegionDetails(region) {
+            modalRegionName.innerHTML = `<i class="fas ${region.icon}"></i> منطقه ${region.name}`;
+            
+            // به روزرسانی عوامل بحران
+            modalCrisisFactors.innerHTML = '';
+            region.crisisFactors.forEach(factor => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-check-circle"></i> ${factor}`;
+                modalCrisisFactors.appendChild(li);
+            });
+            
+            // ایجاد راهکارهای تصادفی برای منطقه
+            generateRandomSolutions(region);
+            
+            // نمایش مودال
+            openModal(regionModal);
+        }
+        
+        function showRegionDetailsForCurrentPlayer() {
+            const currentPlayer = players[currentPlayerIndex];
+            const currentRegion = regions.find(r => r.id === currentPlayer.currentRegion);
+            
+            if (currentRegion) {
+                showRegionDetails(currentRegion);
+            } else {
+                showToast("شما تمام مناطق را تکمیل کرده‌اید!", 'success');
+            }
+        }
+        
+        function generateRandomSolutions(region) {
+            solutionOptions.innerHTML = '';
+            selectedSolution = null;
+            applySolutionButton.disabled = true;
+            
+            // انتخاب تصادفی 3 راهکار از لیست راهکارها
+            const shuffledSolutions = [...solutionTypes].sort(() => 0.5 - Math.random());
+            const regionSolutions = shuffledSolutions.slice(0, 3);
+            
+            // تنظیم تأثیر راهکارها بر اساس سطح بحران منطقه
+            regionSolutions.forEach((solution, index) => {
+                // تعدیل تأثیر بر اساس سطح بحران (راهکارها در مناطق با بحران بالاتر تأثیر کمتری دارند)
+                const impactModifier = 1 - (region.crisisLevel / 200); // بین 0.5 تا 1
+                const adjustedImpact = Math.max(5, Math.floor(solution.baseImpact * impactModifier));
+                
+                const solutionCard = document.createElement('div');
+                solutionCard.className = 'solution-card';
+                solutionCard.dataset.index = index;
+                solutionCard.innerHTML = `
+                    <span class="solution-success-rate">${solution.successRate}% موفقیت</span>
+                    <h4><i class="fas ${solution.icon}"></i> ${solution.name}</h4>
+                    <p>${solution.description}</p>
+                    <div class="solution-meta">
+                        <span class="solution-cost">هزینه: ${solution.cost} امتیاز</span>
+                        <span class="solution-impact">تأثیر: ${adjustedImpact}% کاهش بحران</span>
+                    </div>
+                `;
+                
+                solutionCard.addEventListener('click', () => selectSolution(index, solution, adjustedImpact));
+                solutionOptions.appendChild(solutionCard);
+            });
+        }
+        
+        function selectSolution(index, solution, impact) {
+            // حذف انتخاب قبلی
+            document.querySelectorAll('.solution-card').forEach(card => card.classList.remove('selected'));
+            
+            // انتخاب راهکار جدید
+            document.querySelector(`.solution-card[data-index="${index}"]`).classList.add('selected');
+            selectedSolution = {
+                ...solution,
+                adjustedImpact: impact
+            };
+            
+            // فعال کردن دکمه اعمال راهکار
+            applySolutionButton.disabled = false;
+            playSound(clickSound);
+        }
+        
+        function applySolution() {
+            const currentPlayer = players[currentPlayerIndex];
+            
+            if (!selectedSolution || !selectedRegion) {
+                showToast("لطفاً یک راهکار را انتخاب کنید!", 'error');
+                playSound(crisisSound);
+                return;
+            }
+            
+            if (currentPlayer.resources < selectedSolution.cost) {
+                showToast(`امتیاز کافی ندارید! این راهکار ${selectedSolution.cost} امتیاز نیاز دارد.`, 'error');
+                playSound(crisisSound);
+                return;
+            }
+            
+            // کسر هزینه راهکار
+            currentPlayer.resources -= selectedSolution.cost;
+            currentPlayer.solutionsApplied++;
+            
+            // بررسی موفقیت یا شکست راهکار
+            const isSuccessful = Math.random() * 100 <= selectedSolution.successRate;
+            
+            if (isSuccessful) {
+                // راهکار موفقیت‌آمیز بود
+                const impactBonus = Math.floor(selectedSolution.adjustedImpact * 0.2); // 20% از تأثیر به عنوان پاداش
+                selectedRegion.crisisLevel = Math.max(0, selectedRegion.crisisLevel - selectedSolution.adjustedImpact);
+                currentPlayer.resources += impactBonus;
+                currentPlayer.successfulSolutions++;
+                currentPlayer.score += selectedSolution.adjustedImpact * 2; // افزایش امتیاز کلی
+                
+                // نمایش پیام موفقیت
+                showToast(`${selectedSolution.successMessage} بحران ${selectedSolution.adjustedImpact}% کاهش یافت و ${impactBonus} امتیاز پاداش گرفتید!`, 'success');
+                playSound(successSound);
+                
+                // بررسی حل بحران منطقه
+                checkRegionCompletion(currentPlayer, selectedRegion);
+            } else {
+                // راهکار شکست خورد
+                const penalty = Math.floor(selectedSolution.cost * 0.3); // 30% از هزینه به عنوان جریمه
+                currentPlayer.resources = Math.max(0, currentPlayer.resources - penalty);
+                currentPlayer.failedSolutions++;
+                
+                // نمایش پیام شکست
+                showToast(`${selectedSolution.failureMessage} ${penalty} امتیاز جریمه شدید!`, 'error');
+                playSound(failureSound);
+            }
+            
+            // به روزرسانی نمایش منابع و مناطق
+            updatePlayerResources();
+            updateRegionsStatus();
+            
+            // بستن مودال و ریست انتخاب‌ها
+            closeModal(regionModal);
+            selectedSolution = null;
+        }
+        
+        function checkRegionCompletion(player, region) {
+            if (region.crisisLevel <= 0 && !player.completedRegions.includes(region.id)) {
+                // منطقه حل شده است
+                region.completed = true;
+                player.completedRegions.push(region.id);
+                
+                // پاداش برای حل کامل منطقه
+                const completionBonus = 30 - (region.id * 3); // پاداش کمتر برای مناطق آسان‌تر
+                player.resources += completionBonus;
+                player.score += completionBonus * 2;
+                
+                // رفتن به منطقه بعدی
+                const nextRegionIndex = gameConfig.regionsOrder.indexOf(region.id) + 1;
+                if (nextRegionIndex < gameConfig.regionsOrder.length) {
+                    player.currentRegion = gameConfig.regionsOrder[nextRegionIndex];
+                    showToast(`تبریک! شما بحران منطقه ${region.name} را حل کردید و ${completionBonus} امتیاز پاداش گرفتید! حالا به منطقه ${regions.find(r => r.id === player.currentRegion).name} می‌روید.`, 'success');
+                } else {
+                    // تمام مناطق حل شده‌اند
+                    showToast(`تبریک! شما تمام مناطق را با موفقیت حل کردید و ${completionBonus} امتیاز پاداش گرفتید!`, 'success');
+                }
+                
+                // بررسی پیروزی
+                checkWinCondition();
+                
+                // به روزرسانی نمایش
+                updatePlayerResources();
+            }
+        }
+        
+        function endTurn() {
+            clearInterval(turnInterval);
+            
+            // نمایش پیام اتمام نوبت
+            showToast(`نوبت ${players[currentPlayerIndex].name} به پایان رسید.`, 'success');
+            
+            // تغییر به بازیکن بعدی
+            let nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            
+            // پیدا کردن بازیکن بعدی فعال
+            let attempts = 0;
+            while (!players[nextPlayerIndex].active && attempts < players.length) {
+                nextPlayerIndex = (nextPlayerIndex + 1) % players.length;
+                attempts++;
+            }
+            
+            currentPlayerIndex = nextPlayerIndex;
+            
+            // اگر به شروع دور رسیدیم
+            if (currentPlayerIndex === 0) {
+                round++;
+                currentRoundElement.textContent = round;
+                
+                // نمایش پیام شروع دور جدید
+                showToast(`شروع دور جدید: ${round}`, 'success');
+                
+                // افزایش بحران مناطق به صورت تصادفی (فقط مناطق حل نشده)
+                regions.forEach(region => {
+                    if (!region.completed && Math.random() > 0.3) { // 70% احتمال افزایش بحران
+                        const increase = 5 + Math.floor(Math.random() * 16); // بین 5 تا 20 درصد
+                        region.crisisLevel = Math.min(gameConfig.maxCrisisLevel, region.crisisLevel + increase);
+                    }
+                });
+                
+                updateRegionsStatus();
+                
+                // بررسی بحران شدید
+                checkCrisis();
+
+                // بررسی پایان بازی بر اساس تعداد دورها
+                if (round >= gameConfig.maxRounds) {
+                    endGameByRounds();
+                    return;
+                }
+            }
+            
+            // شروع تایمر نوبت جدید
+            startTurnTimer();
+            
+            // به روزرسانی نوبت
+            updatePlayerTurn();
+            playSound(clickSound);
+        }
+
+        function endGameByRounds() {
+            // پایان بازی بر اساس تعداد دورها - بازیکن با بیشترین امتیاز برنده می‌شود
+            const activePlayers = players.filter(p => p.active);
+            
+            if (activePlayers.length === 0) {
+                // اگر همه بازیکنان خارج شده‌اند
+                endScreen.querySelector('.winner').textContent = "هیچ برنده‌ای وجود ندارد!";
+                endScreen.querySelector('#end-message').textContent = "تمام بازیکنان به دلیل بحران شدید آب از بازی خارج شدند.";
+            } else {
+                // یافتن بازیکن با بیشترین امتیاز
+                const winner = activePlayers.reduce((prev, current) => 
+                    (prev.score > current.score) ? prev : current
+                );
+                
+                endGame(winner);
+            }
+        }
+        
+        function updatePlayerTurn() {
+            const currentPlayer = players[currentPlayerIndex];
+            currentPlayerElement.textContent = currentPlayer.name;
+            
+            // نمایش منطقه فعلی بازیکن
+            const currentRegion = regions.find(r => r.id === currentPlayer.currentRegion);
+            currentRegionElement.textContent = currentRegion ? currentRegion.name : "تمام مناطق تکمیل شده";
+            currentRegionStatusElement.textContent = currentRegion ? 
+                `${currentRegion.name} - ${currentRegion.crisisLevel}% بحران` : "تمام مناطق تکمیل شده";
+            
+            // به روزرسانی توکن فعال
+            document.querySelectorAll('.player-token').forEach((token, index) => {
+                if (index === currentPlayerIndex) {
+                    token.classList.add('active');
+                } else {
+                    token.classList.remove('active');
+                }
+            });
+            
+            // به روزرسانی منابع بازیکن فعلی
+            updatePlayerResources();
+        }
+        
+        function updatePlayerResources() {
+            const currentPlayer = players[currentPlayerIndex];
+            totalResourcesElement.textContent = currentPlayer.resources;
+            
+            // به روزرسانی نمایش توکن‌ها
+            playerResourcesElement.innerHTML = '';
+            const tokenCount = Math.min(4, Math.ceil(currentPlayer.resources / 5));
+            
+            for (let i = 0; i < tokenCount; i++) {
+                const tokenValue = i === tokenCount - 1 ? currentPlayer.resources % 5 || 5 : 5;
+                const token = document.createElement('span');
+                token.className = 'resource-token';
+                token.textContent = tokenValue;
+                playerResourcesElement.appendChild(token);
+            }
+        }
+        
+        function updateRegionsStatus() {
+            regions.forEach(region => {
+                const regionElement = document.querySelector(`.region-${region.id}`);
+                if (regionElement) {
+                    const crisisBar = regionElement.querySelector('.region-crisis');
+                    crisisBar.style.width = `${region.crisisLevel}%`;
+                    
+                    // تغییر رنگ بر اساس سطح بحران
+                    if (region.crisisLevel > 70) {
+                        crisisBar.style.backgroundColor = '#d90429';
+                    } else if (region.crisisLevel > 40) {
+                        crisisBar.style.backgroundColor = '#f8961e';
+                    } else {
+                        crisisBar.style.backgroundColor = '#43aa8b';
+                    }
+                }
+            });
+        }
+        
+        function checkCrisis() {
+            // بررسی بحران شدید در مناطق حل نشده
+            const crisisRegions = regions.filter(region => !region.completed && region.crisisLevel >= 90);
+            
+            if (crisisRegions.length > 0) {
+                crisisRegions.forEach(region => {
+                    showToast(`هشدار! بحران شدید در منطقه ${region.name} (${region.crisisLevel}%)`, 'error');
+                });
+                
+                playSound(crisisSound);
+            }
+        }
+        
+        function checkWinCondition() {
+            // شرایط برنده: بازیکنی که بیشترین مناطق را با امتیاز بالاتر حل کرده باشد
+            const activePlayers = players.filter(p => p.active);
+            
+            // اگر یک بازیکن تمام مناطق را حل کرده باشد
+            const winnerWithAllRegions = activePlayers.find(p => p.completedRegions.length === gameConfig.regionsOrder.length);
+            if (winnerWithAllRegions) {
+                endGame(winnerWithAllRegions);
+                return;
+            }
+            
+            // اگر بیشتر از یک بازیکن باقی نمانده باشد
+            if (activePlayers.length === 1) {
+                endGame(activePlayers[0]);
+            }
+        }
+        
+        function endGame(winner) {
+            clearInterval(gameInterval);
+            clearInterval(turnInterval);
+            
+            // محاسبه آمار پایانی
+            const minutes = Math.floor(gameTime / 60).toString().padStart(2, '0');
+            const seconds = (gameTime % 60).toString().padStart(2, '0');
+            
+            // نمایش صفحه پایان بازی
+            winnerNameElement.textContent = `${winner.name} برنده شد!`;
+            endMessageElement.textContent = `شما با حل بحران ${winner.completedRegions.length} منطقه از 6 منطقه و کسب ${winner.score} امتیاز برنده شدید!`;
+            endTimeElement.textContent = `${minutes}:${seconds}`;
+            endRoundsElement.textContent = round;
+            endRegionsElement.textContent = `${winner.completedRegions.length}/6`;
+            endScoreElement.textContent = winner.score;
+            
+            gameContainer.classList.remove('visible');
+            endScreen.classList.add('active');
+            
+            playSound(winSound);
+        }
+        
+        function showTutorial() {
+            openModal(tutorialModal);
+            playSound(clickSound);
+        }
+        
+        function openModal(modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            playSound(clickSound);
+        }
+        
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+        
+        function playSound(soundElement) {
+            soundElement.currentTime = 0;
+            soundElement.play().catch(e => console.log("Playback prevented:", e));
+        }
+    </script>
+</body>
+</html>
